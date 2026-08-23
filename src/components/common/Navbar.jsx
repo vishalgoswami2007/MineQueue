@@ -1,6 +1,7 @@
 import { NavLink } from 'react-router-dom';   
 import logo from  '../../assets/logo.png';
 import {Moon} from 'lucide-react';
+import {Link} from "react-router-dom"
 
 
 function Navbar() {
@@ -11,8 +12,10 @@ function Navbar() {
                   alt="MineQueue" 
                   className="h-15 w-auto object-contain"
                 />
-      <h1 className="text-xl font-bold text-blue-600 cursor-pointer">MineQueue</h1>
-
+                <Link to="/">
+                 <h1 className="text-xl font-bold text-blue-600 cursor-pointer" >MineQueue</h1>
+              </Link>
+              
       <div className="flex-1 flex justify-center gap-6">
         <NavLink 
           to="/" 
