@@ -2,7 +2,7 @@ import heroIllustration from '../../assets/hero-illustration.png';
 
 function Hero() {
   return (
-    <section className="flex flex-col md:flex-row items-center justify-between px-12 md:px-16 py-16 md:py-24 bg-white">
+    <section className="flex flex-col md:flex-row items-center justify-between px-20 md:px-16 pt-6 pb-5 md:pt-10 md:pb-24 bg-white">
       
       {/* Left Side - Text */}
       <div className="flex-1 text-center md:text-left mb-10 md:mb-0">
