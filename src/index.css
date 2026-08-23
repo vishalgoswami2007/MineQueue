@@ -1,0 +1,10 @@
+@import "tailwindcss";
+
+@keyframes moveLine {
+  0% { left: 0%; }
+  100% { left: 100%; }
+}
+
+.animate-moveLine {
+  animation: moveLine 2s linear infinite;
+}
