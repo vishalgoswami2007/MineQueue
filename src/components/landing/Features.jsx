@@ -1,5 +1,6 @@
 import { Zap, Lock, Smartphone, Users, Bell, LayoutDashboard } from 'lucide-react';
 
+
 function Features(){
    return ( 
     <div className="py-20  px-8 text-center bg-gray-50">
