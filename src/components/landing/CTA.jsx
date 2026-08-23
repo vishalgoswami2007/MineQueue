@@ -1,3 +1,5 @@
+import {Link} from "react-router-dom";
+
 function CTABanner() {
   return (
     <section className="py-16 px-8 bg-linear-to-r from-blue-600 to-teal-500 text-center">
@@ -7,9 +9,11 @@ function CTABanner() {
       <p className="text-blue-100 text-lg mb-8">
         Join thousands finding the right doctor, faster.
       </p>
+      <Link to="/signup">
       <button className="bg-white text-blue-600 font-semibold px-8 py-3 rounded-lg shadow-md hover:bg-gray-100 transition">
         Get Started
       </button>
+    </Link>
     </section>
   );
 }
