@@ -8,7 +8,7 @@ import ForgetPassword from './pages/ForgetPassword.jsx';
 
 function App() {
   const location = useLocation();
-  const hideNavbarPaths = ['/signup', '/login' ,'/forgetPassword'];
+  const hideNavbarPaths = ['/signup', '/logIn' ,'/forgetPassword'];
   const shouldHideNavbar = hideNavbarPaths.includes(location.pathname);
 
   return (

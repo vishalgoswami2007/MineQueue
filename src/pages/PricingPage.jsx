@@ -1,7 +1,7 @@
 import { Check, X } from 'lucide-react';
 import Footer from "../components/common/Footer.jsx"
 import FAQ from "../components/common/Faq.jsx"
-
+import {Link} from "react-router-dom";
 
 function PricingPage() {
   return(
@@ -46,10 +46,11 @@ function PricingPage() {
               <span className="text-gray-400">Priority listing</span>
             </li>
           </ul>
-
+            <Link to="/Signup">
           <button className="mt-8 w-full border-2 border-blue-600 text-blue-600 font-semibold py-3 rounded-lg hover:bg-blue-50 transition">
             Get Started
           </button>
+        </Link>
   </div>
 
 
@@ -92,10 +93,11 @@ function PricingPage() {
             <span className="text-gray-700">Priority listing</span>
           </li>
         </ul>
-
+        <Link to="/signup">
         <button className="mt-8 w-full bg-blue-600 text-white font-semibold py-3 rounded-lg shadow-md hover:bg-blue-700 transition">
           Upgrade Now
         </button>
+        </Link>
    </div>
 
 
@@ -133,11 +135,11 @@ function PricingPage() {
                 <span className="text-gray-700">Top priority + verified badge</span>
               </li>
             </ul>
-
+          <Link to="/signup">
             <button className="mt-8 w-full border-2 border-blue-600 text-blue-600 font-semibold py-3 rounded-lg hover:bg-blue-50 transition">
               Contact Us
             </button>
-
+        </Link>
     </div>
 </div>
       <FAQ/>

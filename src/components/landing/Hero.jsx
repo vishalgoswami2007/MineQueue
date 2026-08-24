@@ -1,4 +1,5 @@
 import heroIllustration from '../../assets/hero-illustration.png';
+import {Link} from "react-router-dom";
 
 function Hero() {
   return (
@@ -16,12 +17,16 @@ function Hero() {
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 mt-8 justify-center md:justify-start">
-          <button className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition">
+          <Link to="/signup">
+          <button  className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition">
             Find a Doctor
           </button>
+          </Link>
+          <Link to="/signup">
           <button className="px-6 py-3 border-2 border-teal-500 text-teal-600 font-semibold rounded-lg hover:bg-teal-50 transition">
             Join as a Doctor
           </button>
+      </Link>
         </div>
       </div>
 
