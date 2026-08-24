@@ -16,9 +16,9 @@ function Footer() {
         <div>
           <h4 className="text-white font-semibold mb-3">Quick Links</h4>
           <ul className="space-y-2 text-sm">
-            <li><Link to="/about" className="hover:text-white transition">About</Link></li>
-            <li><Link to="/features" className="hover:text-white transition">Features</Link></li>
-            <li><Link to="/howItsWork" className="hover:text-white transition">How It Works</Link></li>
+            <li><Link to="/" className="hover:text-white transition">About</Link></li>
+            <li><Link to="/#features" className="hover:text-white transition">Features</Link></li>
+            <li><Link to="/#howItsWork" className="hover:text-white transition">How It Works</Link></li>
             <li><Link to="/pricing" className="hover:text-white transition">Pricing</Link></li>
           </ul>
         </div>
@@ -28,8 +28,8 @@ function Footer() {
           <h4 className="text-white font-semibold mb-3">Company</h4>
           <ul className="space-y-2 text-sm">
             <li><Link to="/contact" className="hover:text-white transition">Contact Us</Link></li>
-            <li><Link to="/privacy" className="hover:text-white transition">Privacy Policy</Link></li>
-            <li><Link to="terms" className="hover:text-white transition">Terms of Service</Link></li>
+            <li><Link to="/privacy-policy" className="hover:text-white transition">Privacy Policy</Link></li>
+            <li><Link to="/terms-of-service" className="hover:text-white transition">Terms of Service</Link></li>
           </ul>
         </div>
 

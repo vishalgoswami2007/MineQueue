@@ -9,7 +9,7 @@ function HowItWorks() {
   ];
 
   return (
-    <section className="py-20 px-8 bg-white text-center">
+    <section id="how-it-works" className="py-20 px-8 bg-white text-center">
       <h2 className="text-4xl font-bold text-gray-900 mb-16">
         How <span className="text-blue-600">MineQueue</span> Works
       </h2>

@@ -2,9 +2,27 @@ import { NavLink } from 'react-router-dom';
 import logo from  '../../assets/logo.png';
 import {Moon} from 'lucide-react';
 import {Link} from "react-router-dom"
+import { useNavigate, useLocation } from 'react-router-dom';
 
 
 function Navbar() {
+
+          const navigate = useNavigate();
+          const location = useLocation();
+
+        const scrollToSection = (id) => {
+
+          if (location.pathname === '/') {
+      
+          document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+       } else {
+              navigate('/');
+          setTimeout(() => {
+                document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+             }, 100);
+      }
+   };
+
   return (
     <nav className="flex items-center justify-between px-10 py-4 bg-white shadow-sm">
          <img 
@@ -23,20 +41,14 @@ function Navbar() {
         >
           Home
         </NavLink>
-
-         <NavLink 
-          to="/Features" 
-          className={({ isActive }) => isActive ? "text-blue-600 font-semibold" : "text-gray-600"}
-        >
-          Features
-        </NavLink>
-
-         <NavLink 
-          to="/HowItsWork" 
-          className={({ isActive }) => isActive ? "text-blue-600 font-semibold" : "text-gray-600"}
-        >
-          How It Works
-        </NavLink>
+            
+        <button onClick={() => scrollToSection('features')} className="text-gray-600 hover:text-blue-600 transition">
+         Features
+        </button>
+ 
+        <button onClick={() => scrollToSection('how-it-works')} className="text-gray-600 hover:text-blue-600 transition">
+        How It Works
+        </button>
 
         <NavLink 
           to="/pricing" 
