@@ -1,6 +1,7 @@
 import { NavLink } from 'react-router-dom';   
 import logo from  '../../assets/logo.png';
-import {Moon} from 'lucide-react';
+import {Moon ,Sun} from 'lucide-react';
+import { useState, useEffect } from 'react';
 import {Link} from "react-router-dom"
 import { useNavigate, useLocation } from 'react-router-dom';
 
@@ -22,6 +23,20 @@ function Navbar() {
              }, 100);
       }
    };
+
+          const [darkMode, setDarkMode] = useState(() => {
+              return localStorage.getItem('theme') === 'dark';
+    });
+                useEffect(() => {
+                if (darkMode) {
+                  document.documentElement.classList.add('dark');
+                  localStorage.setItem('theme', 'dark');
+                } else {
+                  document.documentElement.classList.remove('dark');
+                  localStorage.setItem('theme', 'light');
+                }
+              }, [darkMode]);
+
 
   return (
     <nav className="flex items-center justify-between px-10 py-4 bg-white shadow-sm">
@@ -58,8 +73,8 @@ function Navbar() {
         </NavLink>
       </div>
       <div>
-        <button className="p-2 rounded-full hover:bg-gray-100 transition">
-                  <Moon size={20} className="text-gray-600" />
+        <button onClick={() => setDarkMode(!darkMode)} className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800">
+        {darkMode ? <Sun size={20} className="text-yellow-500" /> : <Moon size={20} className="text-gray-600" />}
         </button>
       </div>
          <div>

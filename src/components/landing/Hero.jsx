@@ -3,15 +3,15 @@ import {Link} from "react-router-dom";
 
 function Hero() {
   return (
-    <section className="flex flex-col md:flex-row items-center justify-between px-20 md:px-16 pt-6 pb-5 md:pt-10 md:pb-24 bg-white">
+    <section className="flex flex-col md:flex-row items-center justify-between px-20 md:px-16 pt-6 pb-5 md:pt-10 md:pb-24 bg-white dark:bg-gray-900 transition-colors">
       
       {/* Left Side - Text */}
       <div className="flex-1 text-center md:text-left mb-10 md:mb-0">
-        <h1 className="text-4xl md:text-5xl font-bold text-gray-900 leading-tight">
-          Book a doctor. <span className="text-blue-600">Skip the wait.</span>
+        <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white leading-tight">
+          Book a doctor. <span className="text-blue-600 dark:text-blue-400">Skip the wait.</span>
         </h1>
 
-        <p className="text-lg text-gray-600 mt-6 max-w-md mx-auto md:mx-0">
+        <p className="text-lg text-gray-600 dark:text-gray-400 mt-6 max-w-md mx-auto md:mx-0">
           Find trusted doctors near you and book your appointment in seconds — 
           no calls, no confusion, just a slot that's truly yours.
         </p>
@@ -23,7 +23,7 @@ function Hero() {
           </button>
           </Link>
           <Link to="/signup">
-          <button className="px-6 py-3 border-2 border-teal-500 text-teal-600 font-semibold rounded-lg hover:bg-teal-50 transition">
+          <button className="px-6 py-3 border-2 border-teal-500 text-teal-600 dark:text-teal-400 font-semibold rounded-lg hover:bg-teal-50 dark:hover:bg-gray-800 transition">
             Join as a Doctor
           </button>
       </Link>

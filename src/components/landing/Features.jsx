@@ -3,7 +3,7 @@ import { Zap, Lock, Smartphone, Users, Bell, LayoutDashboard } from 'lucide-reac
 
 function Features(){
    return ( 
-    <div   id="features" className="py-20  px-8 text-center bg-gray-50">
+    <div   id="features" className="py-20  px-8 text-center bg-gray-50 ">
         <h1 className="text-black text-5xl font-bold">
             What Makes <span className="text-blue-600">MineQueue</span> Different
         </h1>
