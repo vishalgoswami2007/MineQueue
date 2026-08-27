@@ -12,6 +12,8 @@ import PatientDashboard from './pages/patient/PatientDashboard.jsx';
 import FindHospitals from './pages/patient/FindHospitals.jsx';
 import MyAppointments from './pages/patient/MyAppointments.jsx';
 import SearchDoctor from './pages/patient/SearchDoctors.jsx'
+import DoctorsList from "./pages/patient/DoctorsList.jsx";
+import DoctorsProfile from "./pages/patient/DoctorProfile.jsx";
 import MyProfile from './pages/patient/MyProfile.jsx';
 import Setting from './pages/patient/Setting.jsx';
 import DoctorDashboard from './pages/doctor/DoctorDashboard.jsx';
@@ -45,6 +47,14 @@ function App() {
               <Route path="profile" element={<MyProfile />} />
               <Route path="setting" element={<Setting />} />
          </Route>
+               <Route
+                   path="/patient/hospitals/:hospitalId/doctors"
+                        element={<DoctorsList />}
+               />
+               <Route
+                   path="/patient/doctor/:doctorId"
+                        element={<DoctorsProfile />}
+               />
          <Route path="/doctor" element={<DoctorDashboard />}>
               <Route path="profile" element={<EnhanceProfile />} />
               <Route path="schedule" element={<MySchedule />} />
