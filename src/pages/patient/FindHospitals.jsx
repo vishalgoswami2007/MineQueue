@@ -2,6 +2,8 @@ import { useState } from 'react';
 import hospitalImg from '../../assets/hospital1.png';
 import hospitalImg2 from '../../assets/hospital2.png';
 import hospitalImg3 from '../../assets/hospital3.png';
+import { Link } from 'react-router-dom';
+import DoctorList from '../patient/DoctorsList.jsx';
 
 const dummyHospitals = [
   { id: 1, name: "ZyroHospital", city: "Rohtak", state: "Haryana", doctors: 2, image: hospitalImg },
@@ -65,9 +67,9 @@ function FindHospitals() {
 
               <p className="text-sm text-gray-500 mb-4">{hospital.city}, {hospital.state}</p>
 
-              <button className="w-full bg-blue-600 text-white font-semibold py-2 rounded-lg hover:bg-blue-700 transition">
+              <Link to={DoctorList} className="w-full bg-blue-600 text-white font-semibold py-2 rounded-lg hover:bg-blue-700 transition">
                 View Doctors
-              </button>
+              </Link>
             </div>
           </div>
         ))}

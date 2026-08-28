@@ -48,7 +48,7 @@ function App() {
               <Route path="setting" element={<Setting />} />
          </Route>
                <Route
-                   path="/patient/hospitals/:hospitalId/doctors"
+                   path="/patient/hospitals/doctorList"
                         element={<DoctorsList />}
                />
                <Route
