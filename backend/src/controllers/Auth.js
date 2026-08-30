@@ -146,5 +146,29 @@ const login = async (req,res) => {
         }
     }
 
+   const forgetPassword = async (req,res) => {
+     try {
+        const {email, otp} = req.body;
 
-export {signup , login , verifyOtp , GoogleOAuth} 
+        const user = await User.findOne({email})
+
+        if (!user) {
+            return res.status(400).json({message: "User Not Found"})
+        }
+
+        const Otp = Math.floor(100000 + Math.random() * 900000).toString();
+        const otpExpiry = new Date(Date.now() + 10 * 60 * 1000);
+
+            user.otp = Otp;
+            user.otpExpiry = otpExpiry;
+            await user.save()
+          
+       return res.status(200).json({message:"OTP Sent Successfully"}) 
+        
+     } catch (error) {
+        return res.status(400).json({message:"OTP Failed" , error:error.message})
+     }
+   }
+
+
+export {signup , login , verifyOtp , GoogleOAuth , forgetPassword} 
