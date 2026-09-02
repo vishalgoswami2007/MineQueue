@@ -9,7 +9,7 @@ const CreateBooking = async (req , res) => {
 
         const updateSchedule = await Schedule.findOneAndUpdate(
             {doctorId , day , "slots.time": time , "slots.isBooked":false},
-            {$set: {"slots.$.isBooked":true}} ,
+            {$set: {"slots.$.isBooked":true}} , 
             {new: true}
         )
          if (!updateSchedule) {
