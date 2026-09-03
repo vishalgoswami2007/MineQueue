@@ -1,14 +1,36 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { FcGoogle } from 'react-icons/fc';
 import logo from '../assets/logo.png';
-import {useState} from 'useState';
+import {useState} from 'react';
+import axiosInstance from '../utils/AxiosInstance.js';
 
 function Signup() {
+
+  const navigate = useNavigate();
 
   const [fullName , setFullName] =useState("");
   const [password , setPassword] = useState('');
   const [email , setEmail] = useState('');
   const [role , setRole] = useState('patient');
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+       const response = await axiosInstance.post('/auth/signup' ,{
+        
+         fullname: fullName,
+         email,
+         password,
+         role
+       })
+
+       alert(response.data.message);
+       navigate('/login');
+    } catch (error) {
+      alert(error.response?.data?.message || "Signup Failed");
+    }
+  }
 
 
   return (
@@ -28,7 +50,7 @@ function Signup() {
             Create your account
           </h2>
 
-          <form className="space-y-4">
+          <form className="space-y-4 " onSubmit={handleSubmit}>
             <div>
               <input
                 type="text"
