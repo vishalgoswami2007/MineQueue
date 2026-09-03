@@ -1,8 +1,16 @@
 import { Link } from 'react-router-dom';
 import { FcGoogle } from 'react-icons/fc';
 import logo from '../assets/logo.png';
+import {useState} from 'useState';
 
 function Signup() {
+
+  const [fullName , setFullName] =useState("");
+  const [password , setPassword] = useState('');
+  const [email , setEmail] = useState('');
+  const [role , setRole] = useState('patient');
+
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-200">
 
@@ -25,6 +33,8 @@ function Signup() {
               <input
                 type="text"
                 placeholder="Full Name"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
               />
             </div>
@@ -33,6 +43,8 @@ function Signup() {
               <input
                 type="email"
                 placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
               />
             </div>
@@ -41,6 +53,8 @@ function Signup() {
               <input
                 type="password"
                 placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
               />
             </div>
@@ -49,6 +63,8 @@ function Signup() {
               <select
                 name="role"
                 id="role"
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-gray-700"
               >
                 <option value="patient">Patient</option>
