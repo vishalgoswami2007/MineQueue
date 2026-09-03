@@ -2,25 +2,25 @@ import mongoose from 'mongoose';
 
 const UserSchema = new mongoose.Schema({
 
-     Fullname: {
+     fullname: {
         type: String,
         required: true,
         trim: true
      },
-     Email: {
+     email: {
         type: String,
         required: [true, 'Email Address is Required'],
         lowercase: true,
         trim: true,
         unique: true
      },
-     Password: {
+     password: {
         type: String,
         required: function() {
                return this.authProvider === 'local';
         }
      },
-     Role: {
+     role: {
         type: String,
         required: true,
         enum: ["Doctor", "Patient"]

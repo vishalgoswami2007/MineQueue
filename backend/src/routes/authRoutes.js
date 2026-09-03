@@ -4,7 +4,7 @@ import {signup , login , GoogleOAuth , forgetPassword , verifyOtp} from "../cont
 
 const router = express.Router();
 
-router.post('/signup' , signup);
+router.post('/signup', signup);
 router.post('/login' , login);
 router.post('/GoogleOAuth' , GoogleOAuth);
 router.post('/forgetPassword' , forgetPassword);

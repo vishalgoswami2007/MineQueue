@@ -1,5 +1,5 @@
 import express from 'express';
-import { getAllBooking , getMyProfile ,  getAllDoctor } from '../controllers/Dashboard';
+import { getAllBooking , getMyProfile ,  getAllDoctor } from '../controllers/Dashboard.js';
 import {authMiddleware} from "../middleware/authMiddleware.js";
 
 const router = express.Router();

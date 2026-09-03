@@ -1,5 +1,5 @@
 import cloudinary from '../config/cloudinary.js';
-import { User } from '../models/UserSchema.js';
+import { User } from '../modal/UserSchema.js';
 import fs from 'fs';
 
 const uploadDocument = async (req, res) => {
