@@ -1,16 +1,46 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import logo from '../assets/logo.png';
+import {useState} from 'react';
+import axiosInstance from '../utils/AxiosInstance';
 
 
 function LogIn() {
+
+  const navigate = useNavigate()
+
+  const [email , setEmail ] = useState('');
+  const [password , setPassword] = useState('');
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+
+    try {
+      const response = await axiosInstance.post('/auth/login' , {
+        email,
+        password
+      })
+
+       const userRole = response.data.user.role;
+
+      if (userRole === 'Doctor') {
+         navigate('/doctor');
+      } else {
+         navigate('/patient');
+      }
+      
+    } catch (error) {
+      alert(error.response?.data?.message ||"Login Failed")
+    }
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-200">
 
-      {/* LEFT SIDE - Form */}
+      
       <div className="w-full md:w-full flex items-center justify-center p-8">
         <div className="w-full max-w-md">
 
-          {/* Logo + Name */}
+       
           <div className="flex items-center justify-center gap-2 mb-8 cursor-pointer">
             <img src={logo} alt="MineQueue Logo" className="h-10 w-auto" />
             <Link to="/" className="text-xl font-bold text-gray-900">MineQueue</Link>
@@ -20,12 +50,14 @@ function LogIn() {
             LogIn Your account
           </h2>
 
-          <form className="space-y-4">
+          <form className="space-y-4" onSubmit={handleSubmit}>
         
             <div>
               <input
                 type="email"
                 placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
               />
             </div>
@@ -34,6 +66,8 @@ function LogIn() {
               <input
                 type="password"
                 placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
               />
             </div>
