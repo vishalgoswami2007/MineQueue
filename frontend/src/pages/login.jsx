@@ -12,27 +12,29 @@ function LogIn() {
   const [password , setPassword] = useState('');
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
+  e.preventDefault()
 
-    try {
-      const response = await axiosInstance.post('/auth/login' , {
-        email,
-        password
-      })
+  try {
+    const response = await axiosInstance.post('/auth/login', {
+      email,
+      password
+    })
 
-       const userRole = response.data.user.role;
+    const token = response.data.token;
+    const userRole = response.data.user.role;
 
-      if (userRole === 'Doctor') {
-         navigate('/doctor');
-      } else {
-         navigate('/patient');
-      }
-      
-    } catch (error) {
-      alert(error.response?.data?.message ||"Login Failed")
+    localStorage.setItem('token', token);   // NAYA - token save karna
+
+    if (userRole === 'Doctor') {
+       navigate('/doctor');
+    } else {
+       navigate('/patient');
     }
+    
+  } catch (error) {
+    alert(error.response?.data?.message || "Login Failed")
   }
-
+}
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-200">
 
