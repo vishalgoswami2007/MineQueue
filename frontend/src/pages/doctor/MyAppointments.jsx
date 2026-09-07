@@ -1,82 +1,116 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import {
+  CalendarDays,
+  Clock,
+  User,
+  Search,
+  ClipboardList,
+} from "lucide-react";
+
+import axiosInstance from "../../utils/AxiosInstance";
 
 function MyAppointments() {
+  const [appointments, setAppointments] = useState([]);
   const [filter, setFilter] = useState("All");
   const [search, setSearch] = useState("");
 
-  const appointments = [
-    {
-      id: 1,
-      name: "Rahul Sharma",
-      age: 34,
-      gender: "Male",
-      date: "25 Aug 2026",
-      time: "10:30 AM",
-      reason: "Fever & Cold",
-      type: "In-Person",
-      status: "Pending",
-    },
-    {
-      id: 2,
-      name: "Priya Singh",
-      age: 25,
-      gender: "Female",
-      date: "25 Aug 2026",
-      time: "11:30 AM",
-      reason: "Follow-up",
-      type: "Video Call",
-      status: "Confirmed",
-    },
-    {
-      id: 3,
-      name: "Amit Kumar",
-      age: 28,
-      gender: "Male",
-      date: "25 Aug 2026",
-      time: "01:00 PM",
-      reason: "General Checkup",
-      type: "In-Person",
-      status: "Completed",
-    },
-    {
-      id: 4,
-      name: "Neha Verma",
-      age: 31,
-      gender: "Female",
-      date: "26 Aug 2026",
-      time: "10:00 AM",
-      reason: "Consultation",
-      type: "In-Person",
-      status: "Cancelled",
-    },
-    {
-      id: 5,
-      name: "Rohit Mehta",
-      age: 40,
-      gender: "Male",
-      date: "26 Aug 2026",
-      time: "12:30 PM",
-      reason: "Blood Pressure",
-      type: "Video Call",
-      status: "Pending",
-    },
-  ];
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const filteredAppointments = appointments.filter((appointment) => {
-    const matchesFilter =
-      filter === "All" || appointment.status === filter;
+  useEffect(() => {
+    const fetchAppointments = async () => {
+      try {
+        setLoading(true);
+        setError("");
 
-    const matchesSearch =
-      appointment.name.toLowerCase().includes(search.toLowerCase()) ||
-      appointment.reason.toLowerCase().includes(search.toLowerCase());
+        const response = await axiosInstance.get(
+          "/dashboard/Booking"
+        );
 
-    return matchesFilter && matchesSearch;
-  });
+        setAppointments(
+          response.data.bookings || []
+        );
+      } catch (error) {
+        console.error(
+          "Appointments fetch failed:",
+          error
+        );
+
+        setError(
+          error.response?.data?.message ||
+            "Unable to fetch appointments"
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAppointments();
+  }, []);
+
+  const filteredAppointments = useMemo(() => {
+    return appointments.filter((appointment) => {
+      const status =
+        appointment.status || "pending";
+
+      const matchesFilter =
+        filter === "All" ||
+        status.toLowerCase() ===
+          filter.toLowerCase();
+
+      const patientId =
+        String(appointment.patientId || "");
+
+      const matchesSearch =
+        patientId
+          .toLowerCase()
+          .includes(search.trim().toLowerCase()) ||
+        String(appointment.slot || "")
+          .toLowerCase()
+          .includes(search.trim().toLowerCase());
+
+      return matchesFilter && matchesSearch;
+    });
+  }, [appointments, filter, search]);
+
+  const formatDate = (date) => {
+    if (!date) return "Date unavailable";
+
+    return new Date(date).toLocaleDateString(
+      "en-IN",
+      {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      }
+    );
+  };
+
+  const getStatusClasses = (status) => {
+    switch (status?.toLowerCase()) {
+      case "confirmed":
+        return "bg-green-100 text-green-700";
+
+      case "cancelled":
+        return "bg-red-100 text-red-600";
+
+      default:
+        return "bg-amber-100 text-amber-700";
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex min-h-[70vh] items-center justify-center">
+        <p className="text-lg font-semibold text-slate-700">
+          Loading appointments...
+        </p>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-slate-50 px-6 py-8 text-slate-800 transition-colors dark:bg-slate-950 dark:text-white md:px-10">
-
-      {/* Header */}
+    <div className="text-slate-800">
       <div className="mb-7 flex flex-col justify-between gap-4 md:flex-row md:items-center">
 
         <div>
@@ -84,212 +118,178 @@ function MyAppointments() {
             My Appointments
           </h1>
 
-          <p className="mt-2 text-slate-500 dark:text-slate-400">
-            View and manage all your patient appointments
+          <p className="mt-2 text-slate-500">
+            View your patient bookings and appointment status
           </p>
         </div>
 
-        <div className="w-fit rounded-lg bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-600 dark:bg-blue-950/50 dark:text-blue-400">
+        <div className="w-fit rounded-lg bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-600">
           {appointments.length} Total
         </div>
 
       </div>
 
-      {/* Search + Filters */}
-      <div className="mb-5 flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 lg:flex-row lg:items-center lg:justify-between">
+      <div className="mb-6 flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm lg:flex-row lg:items-center lg:justify-between">
 
-        {/* Search */}
-        <div className="flex w-full items-center gap-3 rounded-lg border border-slate-200 px-4 py-2.5 dark:border-slate-700 dark:bg-slate-800 lg:w-80">
+        <div className="flex w-full items-center gap-3 rounded-lg border border-slate-200 px-4 py-2.5 lg:w-80">
 
-          <span className="text-lg text-slate-400">
-            ⌕
-          </span>
+          <Search
+            size={18}
+            className="text-slate-400"
+          />
 
           <input
             type="text"
-            placeholder="Search patient or reason..."
+            placeholder="Search patient ID or slot..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-400 dark:text-white"
+            onChange={(e) =>
+              setSearch(e.target.value)
+            }
+            className="w-full bg-transparent text-sm outline-none placeholder:text-slate-400"
           />
 
         </div>
 
-        {/* Filters */}
         <div className="flex flex-wrap gap-2">
 
-          {["All", "Pending", "Confirmed", "Completed", "Cancelled"].map(
-            (item) => (
-              <button
-                key={item}
-                onClick={() => setFilter(item)}
-                className={`rounded-lg border px-3 py-2 text-sm font-medium transition ${
-                  filter === item
-                    ? "border-blue-600 bg-blue-600 text-white"
-                    : "border-slate-200 bg-white text-slate-600 hover:border-blue-300 hover:text-blue-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-blue-500 dark:hover:text-blue-400"
-                }`}
-              >
-                {item}
-              </button>
-            )
-          )}
+          {[
+            "All",
+            "Pending",
+            "Confirmed",
+            "Cancelled",
+          ].map((item) => (
+            <button
+              type="button"
+              key={item}
+              onClick={() => setFilter(item)}
+              className={`rounded-lg border px-3 py-2 text-sm font-medium transition ${
+                filter === item
+                  ? "border-blue-600 bg-blue-600 text-white"
+                  : "border-slate-200 bg-white text-slate-600 hover:border-blue-300 hover:text-blue-600"
+              }`}
+            >
+              {item}
+            </button>
+          ))}
 
         </div>
 
       </div>
 
-      {/* Appointments Card */}
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+      {error && (
+        <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4 text-center text-sm text-red-600">
+          {error}
+        </div>
+      )}
 
-        {/* Card Header */}
-        <div className="flex flex-col justify-between gap-2 border-b border-slate-200 px-6 py-5 dark:border-slate-800 sm:flex-row sm:items-center">
+      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
 
-          <div>
-            <h2 className="text-lg font-semibold text-slate-800 dark:text-white">
-              All Appointments
-            </h2>
+        <div className="border-b border-slate-200 px-6 py-5">
 
-            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-              {filteredAppointments.length} appointments
-            </p>
-          </div>
+          <h2 className="text-lg font-semibold text-slate-800">
+            Appointments
+          </h2>
+
+          <p className="mt-1 text-sm text-slate-500">
+            {filteredAppointments.length} appointments
+          </p>
 
         </div>
 
-        {/* List */}
-        <div>
+        {!error &&
+          filteredAppointments.map(
+            (appointment) => (
+              <div
+                key={appointment._id}
+                className="grid gap-5 border-b border-slate-100 px-6 py-5 md:grid-cols-2 xl:grid-cols-[1.4fr_1fr_1fr_130px] xl:items-center"
+              >
 
-          {filteredAppointments.map((appointment) => (
-            <div
-              key={appointment.id}
-              className="grid gap-5 border-b border-slate-100 px-6 py-5 dark:border-slate-800 lg:grid-cols-[1.5fr_1fr_1.2fr_110px_180px] lg:items-center"
-            >
+                <div className="flex items-center gap-3">
 
-              {/* Patient */}
-              <div className="flex items-center gap-3">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-600">
+                    <User size={20} />
+                  </div>
 
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-blue-100 font-bold text-blue-600 dark:bg-blue-950 dark:text-blue-400">
-                  {appointment.name.charAt(0)}
+                  <div className="min-w-0">
+                    <p className="text-xs text-slate-400">
+                      Patient
+                    </p>
+
+                    <p className="mt-1 truncate text-sm font-semibold text-slate-800">
+                      {appointment.patientId ||
+                        "Patient unavailable"}
+                    </p>
+                  </div>
+
                 </div>
 
                 <div>
-                  <h3 className="font-semibold text-slate-800 dark:text-white">
-                    {appointment.name}
-                  </h3>
+                  <div className="flex items-center gap-2 text-slate-500">
+                    <CalendarDays size={16} />
 
-                  <p className="mt-1 text-xs text-slate-400">
-                    {appointment.age} Years • {appointment.gender}
+                    <span className="text-xs">
+                      Appointment Date
+                    </span>
+                  </div>
+
+                  <p className="mt-1 text-sm font-semibold text-slate-700">
+                    {formatDate(
+                      appointment.date
+                    )}
                   </p>
                 </div>
 
-              </div>
+                <div>
+                  <div className="flex items-center gap-2 text-slate-500">
+                    <Clock size={16} />
 
-              {/* Date & Time */}
-              <div>
+                    <span className="text-xs">
+                      Time Slot
+                    </span>
+                  </div>
 
-                <p className="text-xs text-slate-400">
-                  Date
-                </p>
+                  <p className="mt-1 text-sm font-semibold text-slate-700">
+                    {appointment.slot ||
+                      "Not provided"}
+                  </p>
+                </div>
 
-                <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                  {appointment.date}
-                </p>
-
-                <p className="mt-2 text-xs text-slate-400">
-                  Time
-                </p>
-
-                <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                  {appointment.time}
-                </p>
-
-              </div>
-
-              {/* Reason */}
-              <div>
-
-                <p className="text-xs text-slate-400">
-                  Reason
-                </p>
-
-                <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">
-                  {appointment.reason}
-                </p>
-
-                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                  {appointment.type}
-                </p>
+                <div>
+                  <span
+                    className={`inline-flex rounded-full px-3 py-1.5 text-xs font-semibold capitalize ${getStatusClasses(
+                      appointment.status
+                    )}`}
+                  >
+                    {appointment.status ||
+                      "pending"}
+                  </span>
+                </div>
 
               </div>
+            )
+          )}
 
-              {/* Status */}
-              <div>
-
-                <span
-                  className={`inline-flex rounded-full px-3 py-1.5 text-xs font-semibold ${
-                    appointment.status === "Pending"
-                      ? "bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-400"
-                      : appointment.status === "Confirmed"
-                      ? "bg-blue-100 text-blue-700 dark:bg-blue-950/50 dark:text-blue-400"
-                      : appointment.status === "Completed"
-                      ? "bg-green-100 text-green-700 dark:bg-green-950/50 dark:text-green-400"
-                      : "bg-red-100 text-red-600 dark:bg-red-950/50 dark:text-red-400"
-                  }`}
-                >
-                  {appointment.status}
-                </span>
-
-              </div>
-
-              {/* Actions */}
-              <div className="flex flex-wrap gap-2">
-
-                {appointment.status === "Pending" && (
-                  <>
-                    <button className="rounded-md bg-green-50 px-3 py-2 text-xs font-semibold text-green-600 transition hover:bg-green-100 dark:bg-green-950/40 dark:text-green-400 dark:hover:bg-green-950/70">
-                      Accept
-                    </button>
-
-                    <button className="rounded-md bg-red-50 px-3 py-2 text-xs font-semibold text-red-600 transition hover:bg-red-100 dark:bg-red-950/40 dark:text-red-400 dark:hover:bg-red-950/70">
-                      Reject
-                    </button>
-                  </>
-                )}
-
-                {appointment.status === "Confirmed" && (
-                  <button className="rounded-md bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-600 transition hover:bg-blue-100 dark:bg-blue-950/40 dark:text-blue-400 dark:hover:bg-blue-950/70">
-                    Complete
-                  </button>
-                )}
-
-                <button className="rounded-md bg-slate-100 px-3 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700">
-                  View
-                </button>
-
-              </div>
-
-            </div>
-          ))}
-
-          {/* No Result */}
-          {filteredAppointments.length === 0 && (
+        {!error &&
+          filteredAppointments.length === 0 && (
             <div className="px-6 py-16 text-center">
 
-              <h3 className="font-semibold text-slate-700 dark:text-slate-200">
+              <ClipboardList
+                size={42}
+                className="mx-auto text-slate-300"
+              />
+
+              <h3 className="mt-4 font-semibold text-slate-700">
                 No appointments found
               </h3>
 
               <p className="mt-2 text-sm text-slate-400">
-                Try changing your search or filter.
+                Your patient bookings will appear here.
               </p>
 
             </div>
           )}
 
-        </div>
-
       </div>
-
     </div>
   );
 }
