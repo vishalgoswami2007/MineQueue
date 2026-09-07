@@ -1,250 +1,347 @@
-import { User, Camera, Upload, FileText } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import {
+  User,
+  Upload,
+  FileText,
+  Building2,
+  Stethoscope,
+  Mail,
+  BadgeCheck,
+  CheckCircle2,
+} from "lucide-react";
+
+import axiosInstance from "../../utils/AxiosInstance";
 
 function EnhanceProfile() {
+  const [profile, setProfile] = useState(null);
   const [degreeCertificate, setDegreeCertificate] = useState(null);
 
-  return (
-    <div className="min-h-screen bg-gray-50 px-6 py-8 text-gray-900 transition-colors dark:bg-gray-950 dark:text-white">
+  const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
 
-      {/* Header */}
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        setLoading(true);
+        setError("");
+
+        const response = await axiosInstance.get("/dashboard/Profile");
+
+        setProfile(response.data.user);
+      } catch (error) {
+        console.error("Profile fetch failed:", error);
+
+        setError(
+          error.response?.data?.message ||
+            "Unable to load doctor profile"
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, []);
+
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0];
+
+    if (!file) return;
+
+    const maxSize = 5 * 1024 * 1024;
+
+    if (file.size > maxSize) {
+      setError("File size must be less than 5MB.");
+      setDegreeCertificate(null);
+      return;
+    }
+
+    setError("");
+    setSuccess("");
+    setDegreeCertificate(file);
+  };
+
+  const handleUploadDocument = async () => {
+    if (!degreeCertificate) {
+      setError("Please select a document first.");
+      return;
+    }
+
+    try {
+      setUploading(true);
+      setError("");
+      setSuccess("");
+
+      const formData = new FormData();
+
+      formData.append("document", degreeCertificate);
+
+      const response = await axiosInstance.post(
+        "/upload/document",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      setProfile(response.data.user);
+
+      setSuccess("Document uploaded successfully.");
+      setDegreeCertificate(null);
+    } catch (error) {
+      console.error("Document upload failed:", error);
+
+      setError(
+        error.response?.data?.message ||
+          "Document upload failed"
+      );
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex min-h-[70vh] items-center justify-center">
+        <p className="text-lg font-semibold text-gray-700">
+          Loading doctor profile...
+        </p>
+      </div>
+    );
+  }
+
+  if (!profile) {
+    return (
+      <div className="py-16 text-center">
+        <h2 className="text-xl font-bold text-red-600">
+          Doctor profile unavailable
+        </h2>
+
+        <p className="mt-2 text-gray-500">
+          {error || "Unable to fetch your profile."}
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="text-gray-900">
       <h1 className="text-center text-3xl font-bold text-blue-600">
-        Enhance Profile
+        Doctor Profile
       </h1>
 
-      <p className="mb-10 mt-2 text-center text-gray-600 dark:text-gray-400">
-        Complete your profile to start accepting appointments
+      <p className="mb-10 mt-2 text-center text-gray-600">
+        View your professional information and upload credentials
       </p>
 
-      {/* Main Card */}
-      <div className="mx-auto max-w-2xl rounded-xl border border-gray-200 bg-white p-8 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+      <div className="mx-auto max-w-2xl rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
 
-        {/* Profile Photo */}
         <div className="mb-8 flex flex-col items-center">
-
-          <div className="relative">
-
-            <div className="flex h-24 w-24 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-950">
-              <User
-                size={40}
-                className="text-blue-600 dark:text-blue-400"
-              />
-            </div>
-
-            <button className="absolute bottom-0 right-0 rounded-full bg-blue-600 p-2 text-white transition hover:bg-blue-700">
-              <Camera size={16} />
-            </button>
-
+          <div className="flex h-24 w-24 items-center justify-center rounded-full bg-blue-100">
+            <User
+              size={40}
+              className="text-blue-600"
+            />
           </div>
 
-          <p className="mt-3 text-sm text-gray-500 dark:text-gray-400">
-            Change Photo
+          <h2 className="mt-4 text-xl font-bold text-gray-900">
+            {profile.fullname}
+          </h2>
+
+          <p className="mt-1 text-sm text-gray-500">
+            Doctor
           </p>
 
+          {profile.isDoctorVerified && (
+            <div className="mt-2 flex items-center gap-1 text-sm font-semibold text-green-600">
+              <BadgeCheck size={17} />
+              Verified Doctor
+            </div>
+          )}
         </div>
 
-        <div className="space-y-5">
+        <div className="space-y-4">
 
-          {/* Full Name */}
-          <div>
-            <label className="mb-1 block text-sm font-semibold text-gray-700 dark:text-gray-300">
-              Full Name
-            </label>
-
-            <input
-              type="text"
-              placeholder="John Doe"
-              className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-gray-800 outline-none focus:border-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder:text-gray-500"
-            />
-          </div>
-
-          {/* Specialization + Qualification */}
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-
-            <div>
-              <label className="mb-1 block text-sm font-semibold text-gray-700 dark:text-gray-300">
-                Specialization
-              </label>
-
-              <input
-                type="text"
-                placeholder="Cardiologist"
-                className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-gray-800 outline-none focus:border-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder:text-gray-500"
+          <div className="rounded-lg border border-gray-200 p-4">
+            <div className="flex items-center gap-3">
+              <Mail
+                size={20}
+                className="text-blue-600"
               />
+
+              <div>
+                <p className="text-xs font-medium text-gray-400">
+                  Email Address
+                </p>
+
+                <p className="mt-1 font-semibold text-gray-900">
+                  {profile.email}
+                </p>
+              </div>
             </div>
+          </div>
 
-            <div>
-              <label className="mb-1 block text-sm font-semibold text-gray-700 dark:text-gray-300">
-                Qualification
-              </label>
-
-              <input
-                type="text"
-                placeholder="MBBS, MD..."
-                className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-gray-800 outline-none focus:border-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder:text-gray-500"
+          <div className="rounded-lg border border-gray-200 p-4">
+            <div className="flex items-center gap-3">
+              <Stethoscope
+                size={20}
+                className="text-blue-600"
               />
-            </div>
 
+              <div>
+                <p className="text-xs font-medium text-gray-400">
+                  Specialization
+                </p>
+
+                <p className="mt-1 font-semibold text-gray-900">
+                  {profile.specialization ||
+                    "Not added yet"}
+                </p>
+              </div>
+            </div>
           </div>
 
-          {/* Experience + Fees */}
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-
-            <div>
-              <label className="mb-1 block text-sm font-semibold text-gray-700 dark:text-gray-300">
-                Experience
-              </label>
-
-              <select className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-gray-700 outline-none focus:border-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200">
-                <option>0-1 Year</option>
-                <option>1 Year</option>
-                <option>2 Years</option>
-                <option>3 Years</option>
-                <option>4 Years</option>
-                <option>5+ Years</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="mb-1 block text-sm font-semibold text-gray-700 dark:text-gray-300">
-                Consultation Fees (₹)
-              </label>
-
-              <input
-                type="number"
-                placeholder="500"
-                className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-gray-800 outline-none focus:border-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder:text-gray-500"
+          <div className="rounded-lg border border-gray-200 p-4">
+            <div className="flex items-center gap-3">
+              <Building2
+                size={20}
+                className="text-blue-600"
               />
+
+              <div>
+                <p className="text-xs font-medium text-gray-400">
+                  Hospital / Clinic
+                </p>
+
+                <p className="mt-1 font-semibold text-gray-900">
+                  {profile.hospital ||
+                    "Not added yet"}
+                </p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div className="mt-8 border-t border-gray-200 pt-6">
+          <h2 className="text-lg font-bold text-gray-900">
+            Medical Credential
+          </h2>
+
+          <p className="mt-1 text-sm text-gray-500">
+            Upload your medical degree or verification document.
+          </p>
+        </div>
+
+        {profile.documents && (
+          <div className="mt-5 rounded-lg border border-green-200 bg-green-50 p-4">
+
+            <div className="flex items-center gap-3">
+              <CheckCircle2
+                size={20}
+                className="text-green-600"
+              />
+
+              <div className="min-w-0 flex-1">
+                <p className="font-semibold text-green-700">
+                  Document Uploaded
+                </p>
+
+                <a
+                  href={profile.documents}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-1 block truncate text-sm text-blue-600 hover:underline"
+                >
+                  View uploaded document
+                </a>
+              </div>
             </div>
 
           </div>
+        )}
 
-          {/* Bio */}
-          <div>
-            <label className="mb-1 block text-sm font-semibold text-gray-700 dark:text-gray-300">
-              Bio / About
-            </label>
+        <div className="mt-5">
 
-            <textarea
-              placeholder="Tell patients about your experience and expertise..."
-              rows="4"
-              className="w-full resize-none rounded-lg border border-gray-300 bg-white px-4 py-3 text-gray-800 outline-none focus:border-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder:text-gray-500"
-            />
-          </div>
+          <label
+            htmlFor="degreeCertificate"
+            className="flex cursor-pointer items-center justify-between rounded-lg border-2 border-dashed border-blue-300 bg-blue-50 px-4 py-4 transition hover:border-blue-500 hover:bg-blue-100"
+          >
+            <div className="flex min-w-0 items-center gap-3">
 
-          {/* Hospital */}
-          <div>
-            <label className="mb-1 block text-sm font-semibold text-gray-700 dark:text-gray-300">
-              Hospital / Clinic
-            </label>
-
-            <input
-              type="text"
-              placeholder="LifeCare Hospital"
-              className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-gray-800 outline-none focus:border-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder:text-gray-500"
-            />
-          </div>
-
-          {/* Verification */}
-          <div className="border-t border-gray-200 pt-6 dark:border-gray-800">
-
-            <h2 className="text-lg font-bold text-gray-900 dark:text-white">
-              Verification
-            </h2>
-
-            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-              Verify your medical credentials to start accepting appointments.
-            </p>
-
-          </div>
-
-          {/* Medical Registration */}
-          <div>
-            <label className="mb-1 block text-sm font-semibold text-gray-700 dark:text-gray-300">
-              Medical Registration Number
-            </label>
-
-            <input
-              type="text"
-              placeholder="MMC/12345/2020"
-              className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-gray-800 outline-none focus:border-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder:text-gray-500"
-            />
-          </div>
-
-          {/* Degree Certificate */}
-          <div>
-
-            <label className="mb-2 block text-sm font-semibold text-gray-700 dark:text-gray-300">
-              Degree Certificate
-            </label>
-
-            <label
-              htmlFor="degreeCertificate"
-              className="flex cursor-pointer items-center justify-between rounded-lg border-2 border-dashed border-blue-300 bg-blue-50 px-4 py-4 transition hover:border-blue-500 hover:bg-blue-100 dark:border-blue-800 dark:bg-blue-950/30 dark:hover:bg-blue-950/50"
-            >
-
-              <div className="flex items-center gap-3">
-
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600 text-white">
-                  {degreeCertificate ? (
-                    <FileText size={20} />
-                  ) : (
-                    <Upload size={20} />
-                  )}
-                </div>
-
-                <div>
-                  <p className="text-sm font-semibold text-gray-800 dark:text-gray-200">
-                    {degreeCertificate
-                      ? degreeCertificate.name
-                      : "Upload Degree Certificate"}
-                  </p>
-
-                  <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                    PDF, JPG or PNG • Max 5MB
-                  </p>
-                </div>
-
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-600 text-white">
+                {degreeCertificate ? (
+                  <FileText size={20} />
+                ) : (
+                  <Upload size={20} />
+                )}
               </div>
 
-              <span className="rounded-md bg-blue-600 px-3 py-2 text-xs font-semibold text-white">
-                Choose File
-              </span>
+              <div className="min-w-0">
+                <p className="truncate text-sm font-semibold text-gray-800">
+                  {degreeCertificate
+                    ? degreeCertificate.name
+                    : "Choose Medical Document"}
+                </p>
 
-            </label>
+                <p className="mt-1 text-xs text-gray-500">
+                  PDF, JPG or PNG • Maximum 5MB
+                </p>
+              </div>
+            </div>
 
-            <input
-              type="file"
-              id="degreeCertificate"
-              accept="image/*,.pdf"
-              className="hidden"
-              onChange={(e) => setDegreeCertificate(e.target.files[0])}
-            />
+            <span className="ml-3 shrink-0 rounded-md bg-blue-600 px-3 py-2 text-xs font-semibold text-white">
+              Choose
+            </span>
+          </label>
 
-          </div>
-
-          {/* Info Box */}
-          <div className="rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-900/50 dark:bg-red-950/30">
-
-            <p className="text-sm text-gray-700 dark:text-gray-300">
-              <span className="font-bold text-gray-900 dark:text-white">
-                Important:
-              </span>{" "}
-              Your profile will be reviewed before it becomes visible to
-              patients.
-            </p>
-
-          </div>
+          <input
+            type="file"
+            id="degreeCertificate"
+            accept="image/*,.pdf"
+            className="hidden"
+            onChange={handleFileChange}
+          />
 
         </div>
 
-        {/* Submit */}
-        <button className="mt-8 w-full rounded-lg bg-blue-600 py-3 font-semibold text-white transition hover:bg-blue-700">
-          Submit for Verification
+        {error && (
+          <div className="mt-5 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600">
+            {error}
+          </div>
+        )}
+
+        {success && (
+          <div className="mt-5 rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-600">
+            {success}
+          </div>
+        )}
+
+        <button
+          type="button"
+          disabled={!degreeCertificate || uploading}
+          onClick={handleUploadDocument}
+          className="mt-6 w-full rounded-lg bg-blue-600 py-3 font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-gray-300"
+        >
+          {uploading
+            ? "Uploading..."
+            : profile.documents
+              ? "Upload New Document"
+              : "Upload Document"}
         </button>
 
-      </div>
+        <div className="mt-6 rounded-lg border border-blue-100 bg-blue-50 p-4">
+          <p className="text-sm text-gray-700">
+            Your uploaded medical document can be reviewed for doctor verification.
+          </p>
+        </div>
 
+      </div>
     </div>
   );
 }
