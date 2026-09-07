@@ -90,7 +90,7 @@ function Signup() {
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-gray-700"
               >
                 <option value="Patient">Patient</option>
-                <option value="doctor">Doctor</option>
+                <option value="Doctor">Doctor</option>
               </select>
             </div>
 
