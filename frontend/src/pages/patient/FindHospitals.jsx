@@ -67,7 +67,7 @@ function FindHospitals() {
 
               <p className="text-sm text-gray-500 mb-4">{hospital.city}, {hospital.state}</p>
 
-              <Link to={DoctorList} className="w-full bg-blue-600 text-white font-semibold py-2 rounded-lg hover:bg-blue-700 transition">
+              <Link to={'/patient/hospitals/doctorList'} className="w-full bg-blue-600 text-white font-semibold py-2 rounded-lg hover:bg-blue-700 transition">
                 View Doctors
               </Link>
             </div>

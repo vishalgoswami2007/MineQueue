@@ -1,52 +1,26 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Star, CalendarDays, UserRound } from "lucide-react";
+import { useState, useEffect } from "react";
+import axiosInstance from "../../utils/axiosInstance";
 
 function DoctorsList() {
   const { hospitalId } = useParams();
   const navigate = useNavigate();
 
-  const doctors = [
-    {
-      id: 1,
-      name: "Dr. Rahul Sharma",
-      specialization: "Cardiologist",
-      experience: "12 Years",
-      rating: "4.9",
-      fees: "₹600",
-    },
-    {
-      id: 2,
-      name: "Dr. Priya Mehta",
-      specialization: "Dermatologist",
-      experience: "8 Years",
-      rating: "4.8",
-      fees: "₹500",
-    },
-    {
-      id: 3,
-      name: "Dr. Amit Verma",
-      specialization: "Orthopedic",
-      experience: "10 Years",
-      rating: "4.7",
-      fees: "₹700",
-    },
-    {
-      id: 4,
-      name: "Dr. Neha Kapoor",
-      specialization: "Gynecologist",
-      experience: "7 Years",
-      rating: "4.9",
-      fees: "₹600",
-    },
-    {
-      id: 5,
-      name: "Dr. Arjun Singh",
-      specialization: "Neurologist",
-      experience: "15 Years",
-      rating: "4.8",
-      fees: "₹800",
-    },
-  ];
+ 
+  const [doctors, setDoctors] = useState([]);
+
+      useEffect(() => {
+        const fetchDoctors = async () => {
+            try {
+              const response = await axiosInstance.get('/dashboard/doctors');
+              setDoctors(response.data.doctors);
+            } catch (error) {
+              console.log(error);
+            }
+        };
+        fetchDoctors();
+      }, []);
 
   return (
     <div className="min-h-screen bg-slate-50 px-6 py-8 dark:bg-slate-950">
@@ -98,7 +72,7 @@ function DoctorsList() {
 
         {doctors.map((doctor) => (
           <div
-            key={doctor.id}
+            key={doctor._id}
             className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
           >
 
@@ -114,7 +88,7 @@ function DoctorsList() {
 
               <div>
                 <h3 className="font-semibold text-slate-800 dark:text-white">
-                  {doctor.name}
+                  {doctor.fullname}
                 </h3>
 
                 <p className="mt-1 text-sm text-blue-600 dark:text-blue-400">
@@ -165,7 +139,7 @@ function DoctorsList() {
 
               <button
                 onClick={() =>
-                  navigate(`/patient/doctor/${doctor.id}`)
+                  navigate(`/patient/doctor/${doctor._id}`)
                 }
                 className="flex-1 rounded-lg border border-slate-200 px-3 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-blue-300 hover:text-blue-600 dark:border-slate-700 dark:text-slate-300 dark:hover:border-blue-500 dark:hover:text-blue-400"
               >
@@ -174,7 +148,7 @@ function DoctorsList() {
 
               <button
                 onClick={() =>
-                  navigate(`/patient/doctor/${doctor.id}/book`)
+                  navigate(`/patient/doctor/${doctor._id}/book`)
                 }
                 className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-blue-600 px-3 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700"
               >
