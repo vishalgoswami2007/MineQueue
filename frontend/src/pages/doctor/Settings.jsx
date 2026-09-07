@@ -16,6 +16,7 @@ function Settings() {
 
   const handleLogout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("role");
 
     navigate("/logIn", {
       replace: true,

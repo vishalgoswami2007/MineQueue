@@ -42,6 +42,7 @@ function LogIn() {
       }
 
       localStorage.setItem("token", token);
+      localStorage.setItem("role", userRole);
 
       if (userRole === "Doctor") {
         navigate("/doctor/profile", {

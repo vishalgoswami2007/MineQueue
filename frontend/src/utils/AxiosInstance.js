@@ -37,6 +37,7 @@ axiosInstance.interceptors.response.use(
 
     if (status === 401 && token) {
       localStorage.removeItem("token");
+       localStorage.removeItem("role");
 
       if (window.location.pathname !== "/logIn") {
         window.location.href = "/logIn";

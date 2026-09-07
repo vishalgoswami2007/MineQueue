@@ -33,31 +33,93 @@ import DoctorAppointments from "./pages/doctor/MyAppointments.jsx";
 import OtherDoctors from "./pages/doctor/OtherDoctors.jsx";
 import Settings from "./pages/doctor/Settings.jsx";
 
+function ProtectedRoute({
+  allowedRole,
+  children,
+}) {
+  const token = localStorage.getItem("token");
+  const role = localStorage.getItem("role");
+
+  if (!token) {
+    return (
+      <Navigate
+        to="/logIn"
+        replace
+      />
+    );
+  }
+
+  if (!role) {
+    return (
+      <Navigate
+        to="/logIn"
+        replace
+      />
+    );
+  }
+
+  if (role !== allowedRole) {
+    if (role === "Doctor") {
+      return (
+        <Navigate
+          to="/doctor/profile"
+          replace
+        />
+      );
+    }
+
+    if (role === "Patient") {
+      return (
+        <Navigate
+          to="/patient/hospitals"
+          replace
+        />
+      );
+    }
+
+    return (
+      <Navigate
+        to="/logIn"
+        replace
+      />
+    );
+  }
+
+  return children;
+}
+
 function App() {
   const location = useLocation();
 
-  const dashboardRoute =
-    location.pathname.startsWith("/patient") ||
-    location.pathname.startsWith("/doctor");
+  const pathname = location.pathname;
 
-  const authOrStandaloneRoute = [
+  const dashboardRoute =
+    pathname === "/patient" ||
+    pathname.startsWith("/patient/") ||
+    pathname === "/doctor" ||
+    pathname.startsWith("/doctor/");
+
+  const standaloneRoutes = [
     "/signup",
     "/logIn",
     "/forgetPassword",
     "/privacy-policy",
     "/terms-of-service",
     "/contact",
-  ].includes(location.pathname);
+  ];
 
   const shouldHideNavbar =
-    dashboardRoute || authOrStandaloneRoute;
+    dashboardRoute ||
+    standaloneRoutes.includes(pathname);
 
   return (
     <div>
       {!shouldHideNavbar && <Navbar />}
 
       <Routes>
+
         {/* Public Routes */}
+
         <Route
           path="/"
           element={<LandingPage />}
@@ -98,11 +160,17 @@ function App() {
           element={<Contactus />}
         />
 
-        {/* Patient Dashboard */}
+        {/* Patient Routes */}
+
         <Route
           path="/patient"
-          element={<PatientDashboard />}
+          element={
+            <ProtectedRoute allowedRole="Patient">
+              <PatientDashboard />
+            </ProtectedRoute>
+          }
         >
+
           <Route
             index
             element={
@@ -152,13 +220,20 @@ function App() {
             path="setting"
             element={<Setting />}
           />
+
         </Route>
 
-        {/* Doctor Dashboard */}
+        {/* Doctor Routes */}
+
         <Route
           path="/doctor"
-          element={<DoctorDashboard />}
+          element={
+            <ProtectedRoute allowedRole="Doctor">
+              <DoctorDashboard />
+            </ProtectedRoute>
+          }
         >
+
           <Route
             index
             element={
@@ -193,9 +268,11 @@ function App() {
             path="settings"
             element={<Settings />}
           />
+
         </Route>
 
         {/* Invalid Route */}
+
         <Route
           path="*"
           element={
@@ -205,6 +282,7 @@ function App() {
             />
           }
         />
+
       </Routes>
     </div>
   );
