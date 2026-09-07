@@ -1,7 +1,7 @@
 import bcrypt, { hash } from "bcrypt";
 import {User} from "../modal/UserSchema.js";
 import jwt from 'jsonwebtoken';
-
+import { OAuth2Client } from "google-auth-library";
 
 const signup = async (req,res) => {
     try {
@@ -102,53 +102,104 @@ const login = async (req,res) => {
   }
 } 
 
-    const GoogleOAuth = async (req,res) => {
-        try {
-            const {email , name , googleId} = req.body;
+    
 
-            const user = await User.findOne({email})
+           const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
-            if (user) {
+                const GoogleOAuth = async (req, res) => {
+          try {
+                    const { credential, role = "Patient" } = req.body;
 
-              const token = jwt.sign(
-                { userId: user._id, role: user.role },
-                process.env.JWT_SECRET,
-                { expiresIn: '7d' }
-            )
-              return res.status(200).json({
-                message: "Login Successful",
-                token: token,
-                user: { fullname: user.fullname, email: user.email, role: user.role }
-            })  
-              
-            }else{
+                    if (!credential) {
+                    return res.status(400).json({
+                        message: "Google credential is required",
+                    });
+                    }
 
-                const userCreate = await User.create({
-                    fullname: name,
-                    email,
-                    googleId,
-                    authProvider: "google"
-                })
-                const token = jwt.sign(
-                        { userId: userCreate._id, role: userCreate.role },
-                        process.env.JWT_SECRET,
-                        { expiresIn: '7d' }
-              )
+                    if (!["Patient", "Doctor"].includes(role)) {
+                    return res.status(400).json({
+                        message: "Invalid account role",
+                    });
+                    }
 
-                 return res.status(201).json({
-                        message: "Account Created Successfully",
-                        token: token,
-                        user: { fullname: userCreate.fullname, email: userCreate.email, role: userCreate.role }
-   })
-            }
+                    const ticket = await googleClient.verifyIdToken({
+                    idToken: credential,
+                    audience: process.env.GOOGLE_CLIENT_ID,
+                    });
 
+                    const payload = ticket.getPayload();
+
+                    if (!payload?.sub || !payload?.email || !payload.email_verified) {
+                    return res.status(401).json({
+                        message: "Google account verification failed",
+                    });
+                    }
+
+                    const googleId = payload.sub;
+                    const email = payload.email.toLowerCase().trim();
+                    const fullname = payload.name || email.split("@")[0];
+
+                    let user = await User.findOne({ googleId });
+
+                    if (!user) {
+                    user = await User.findOne({ email });
+
+                    if (user) {
+                        if (user.authProvider !== "google") {
+                        return res.status(409).json({
+                            message:
+                            "An account with this email already exists. Please sign in using your password.",
+                        });
+                        }
+
+                        if (user.googleId && user.googleId !== googleId) {
+                        return res.status(409).json({
+                            message: "This email is linked to another Google account",
+                        });
+                        }
+
+                        user.googleId = googleId;
+                        user.isVerified = true;
+                        await user.save();
+                    } else {
+                        user = await User.create({
+                        fullname,
+                        email,
+                        role,
+                        googleId,
+                        authProvider: "google",
+                        isVerified: true,
+                        });
+                    }
+                    }
+
+                    const token = jwt.sign(
+                    {
+                        userId: user._id,
+                        role: user.role,
+                    },
+                    process.env.JWT_SECRET,
+                    { expiresIn: "7d" }
+                    );
+
+                    return res.status(200).json({
+                    message: "Google authentication successful",
+                    token,
+                    user: {
+                        fullname: user.fullname,
+                        email: user.email,
+                        role: user.role,
+                    },
+                    });
         } catch (error) {
-            return res.status(400).json({
-                message:"Google Oauth Failed",
-                error: error.message
-            })
-        }
-    }
+                  console.error("Google OAuth error:", error);
+
+                    return res.status(401).json({
+                    message: "Google authentication failed",
+                    });
+                }
+                };
+
 
    const forgetPassword = async (req,res) => {
      try {

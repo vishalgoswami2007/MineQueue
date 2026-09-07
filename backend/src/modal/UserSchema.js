@@ -20,6 +20,11 @@ const UserSchema = new mongoose.Schema({
                return this.authProvider === 'local';
         }
      },
+     googleId: {
+         type: String,
+         unique: true,
+         sparse: true,
+      },
      role: {
         type: String,
         required: true,
