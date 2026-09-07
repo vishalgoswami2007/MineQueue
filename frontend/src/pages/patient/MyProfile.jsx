@@ -1,99 +1,196 @@
-import { User, Camera } from 'lucide-react';
+import { useEffect, useState } from "react";
+import {
+  User,
+  Mail,
+  ShieldCheck,
+  BadgeCheck,
+} from "lucide-react";
+
+import axiosInstance from "../../utils/AxiosInstance";
 
 function MyProfile() {
+  const [profile, setProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        setLoading(true);
+        setError("");
+
+        const response = await axiosInstance.get("/dashboard/Profile");
+
+        setProfile(response.data.user);
+      } catch (error) {
+        console.error("Profile fetch failed:", error);
+
+        setError(
+          error.response?.data?.message ||
+            "Unable to fetch profile"
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex min-h-[70vh] items-center justify-center">
+        <p className="text-lg font-semibold text-gray-700">
+          Loading profile...
+        </p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="mx-auto max-w-xl py-16 text-center">
+        <h2 className="text-xl font-bold text-red-600">
+          Unable to load profile
+        </h2>
+
+        <p className="mt-2 text-gray-500">
+          {error}
+        </p>
+      </div>
+    );
+  }
+
+  if (!profile) {
+    return (
+      <div className="py-16 text-center text-gray-500">
+        Profile not found.
+      </div>
+    );
+  }
+
   return (
     <div>
-      {/* Heading */}
-      <h1 className="text-3xl font-bold text-blue-600 text-center">My Profile</h1>
-      <p className="text-gray-600 text-center mt-2 mb-10">Manage your personal information</p>
+      <h1 className="text-center text-3xl font-bold text-blue-600">
+        My Profile
+      </h1>
 
-      <div className="max-w-2xl mx-auto bg-white border border-gray-200 rounded-xl shadow-sm p-8">
+      <p className="mt-2 mb-10 text-center text-gray-600">
+        View your account information
+      </p>
 
-        {/* Profile Photo */}
-        <div className="flex flex-col items-center mb-8">
-          <div className="relative">
-            <div className="w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center">
-              <User size={40} className="text-blue-600" />
-            </div>
-            <button className="absolute bottom-0 right-0 bg-blue-600 p-2 rounded-full text-white hover:bg-blue-700 transition">
-              <Camera size={16} />
-            </button>
+      <div className="mx-auto max-w-2xl rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
+
+        <div className="mb-8 flex flex-col items-center">
+
+          <div className="flex h-24 w-24 items-center justify-center rounded-full bg-blue-100">
+            <User
+              size={40}
+              className="text-blue-600"
+            />
           </div>
-          <p className="text-sm text-gray-500 mt-3">Change Photo</p>
+
+          <h2 className="mt-4 text-xl font-bold text-gray-900">
+            {profile.fullname}
+          </h2>
+
+          <p className="mt-1 text-sm text-gray-500">
+            {profile.role}
+          </p>
+
         </div>
 
-        {/* Form Fields */}
         <div className="space-y-5">
 
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">Full Name</label>
-            <input
-              type="text"
-              placeholder="John Doe"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">Email</label>
-            <input
-              type="email"
-              placeholder="john@example.com"
-              disabled
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">Phone Number</label>
-            <input
-              type="tel"
-              placeholder="+91 9876543210"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1">Gender</label>
-              <select className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 text-gray-700">
-                <option>Male</option>
-                <option>Female</option>
-                <option>Other</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1">Date of Birth</label>
-              <input
-                type="date"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+          <div className="rounded-lg border border-gray-200 p-4">
+            <div className="flex items-center gap-3">
+              <User
+                size={20}
+                className="text-blue-600"
               />
+
+              <div>
+                <p className="text-xs font-medium text-gray-400">
+                  Full Name
+                </p>
+
+                <p className="mt-1 font-semibold text-gray-900">
+                  {profile.fullname}
+                </p>
+              </div>
             </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">City</label>
-            <input
-              type="text"
-              placeholder="Rohtak"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-            />
+          <div className="rounded-lg border border-gray-200 p-4">
+            <div className="flex items-center gap-3">
+              <Mail
+                size={20}
+                className="text-blue-600"
+              />
+
+              <div>
+                <p className="text-xs font-medium text-gray-400">
+                  Email Address
+                </p>
+
+                <p className="mt-1 font-semibold text-gray-900">
+                  {profile.email}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-lg border border-gray-200 p-4">
+            <div className="flex items-center gap-3">
+              <ShieldCheck
+                size={20}
+                className="text-blue-600"
+              />
+
+              <div>
+                <p className="text-xs font-medium text-gray-400">
+                  Account Type
+                </p>
+
+                <p className="mt-1 font-semibold text-gray-900">
+                  {profile.role}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-lg border border-gray-200 p-4">
+            <div className="flex items-center gap-3">
+              <BadgeCheck
+                size={20}
+                className={
+                  profile.isVerified
+                    ? "text-green-600"
+                    : "text-yellow-500"
+                }
+              />
+
+              <div>
+                <p className="text-xs font-medium text-gray-400">
+                  Verification Status
+                </p>
+
+                <p
+                  className={`mt-1 font-semibold ${
+                    profile.isVerified
+                      ? "text-green-600"
+                      : "text-yellow-600"
+                  }`}
+                >
+                  {profile.isVerified
+                    ? "Verified"
+                    : "Not Verified"}
+                </p>
+              </div>
+            </div>
           </div>
 
         </div>
-
-        {/* Save Button */}
-        <button className="w-full mt-8 bg-blue-600 text-white font-semibold py-3 rounded-lg hover:bg-blue-700 transition">
-          Save Changes
-        </button>
-
-        {/* Danger Zone */}
-        <div className="mt-8 pt-6 border-t border-gray-200 text-center">
-          <button className="text-red-500 text-sm font-medium hover:underline">
-            Delete Account
-          </button>
-        </div>
-
       </div>
     </div>
   );
