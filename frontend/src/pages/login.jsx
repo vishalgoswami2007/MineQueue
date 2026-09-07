@@ -1,107 +1,212 @@
-import { Link, useNavigate } from 'react-router-dom';
-import logo from '../assets/logo.png';
-import {useState} from 'react';
-import axiosInstance from '../utils/AxiosInstance';
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 
+import logo from "../assets/logo.png";
+import axiosInstance from "../utils/AxiosInstance";
 
 function LogIn() {
+  const navigate = useNavigate();
 
-  const navigate = useNavigate()
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-  const [email , setEmail ] = useState('');
-  const [password , setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e) => {
-  e.preventDefault()
+    e.preventDefault();
 
-  try {
-    const response = await axiosInstance.post('/auth/login', {
-      email,
-      password
-    })
-
-    const token = response.data.token;
-    const userRole = response.data.user.role;
-
-    localStorage.setItem('token', token);   // NAYA - token save karna
-
-    if (userRole === 'Doctor') {
-       navigate('/doctor');
-    } else {
-       navigate('/patient');
+    if (!email.trim() || !password.trim()) {
+      setError("Email and password are required.");
+      return;
     }
-    
-  } catch (error) {
-    alert(error.response?.data?.message || "Login Failed")
-  }
-}
+
+    try {
+      setLoading(true);
+      setError("");
+
+      const response = await axiosInstance.post(
+        "/auth/login",
+        {
+          email: email.trim(),
+          password,
+        }
+      );
+
+      const token = response.data?.token;
+      const userRole = response.data?.user?.role;
+
+      if (!token || !userRole) {
+        setError("Invalid login response from server.");
+        return;
+      }
+
+      localStorage.setItem("token", token);
+
+      if (userRole === "Doctor") {
+        navigate("/doctor/profile", {
+          replace: true,
+        });
+
+        return;
+      }
+
+      if (userRole === "Patient") {
+        navigate("/patient/hospitals", {
+          replace: true,
+        });
+
+        return;
+      }
+
+      localStorage.removeItem("token");
+
+      setError("Your account role is not supported.");
+    } catch (error) {
+      console.error("Login error:", error);
+
+      setError(
+        error.response?.data?.message ||
+          "Login failed. Please try again."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-200">
+    <div className="flex min-h-screen items-center justify-center bg-gray-100 px-4">
 
-      
-      <div className="w-full md:w-full flex items-center justify-center p-8">
-        <div className="w-full max-w-md">
+      <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-sm">
 
-       
-          <div className="flex items-center justify-center gap-2 mb-8 cursor-pointer">
-            <img src={logo} alt="MineQueue Logo" className="h-10 w-auto" />
-            <Link to="/" className="text-xl font-bold text-gray-900">MineQueue</Link>
-          </div>
+        <div className="mb-8 flex items-center justify-center gap-2">
+          <img
+            src={logo}
+            alt="MineQueue Logo"
+            className="h-10 w-auto"
+          />
 
-          <h2 className="text-2xl font-bold text-gray-900 text-center mb-6">
-            LogIn Your account
-          </h2>
+          <Link
+            to="/"
+            className="text-xl font-bold text-gray-900"
+          >
+            MineQueue
+          </Link>
+        </div>
 
-          <form className="space-y-4" onSubmit={handleSubmit}>
-        
-            <div>
-              <input
-                type="email"
-                placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-              />
-            </div>
+        <div className="mb-6 text-center">
 
-            <div>
-              <input
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-              />
-            </div>
+          <h1 className="text-2xl font-bold text-gray-900">
+            Login to your account
+          </h1>
 
-
-            <button
-              type="submit"
-              className="w-full bg-blue-600 text-white font-semibold py-3 rounded-lg hover:bg-blue-700 transition"
-            >
-              Login
-            </button>
-            <Link to="/forgetPassword" className='text-black cursor-pointer'>Forget Password?</Link>
-          </form>
-
-          {/* OR Divider */}
-          <div className="flex items-center gap-3 my-6">
-            <div className="flex-1 h-px bg-gray-300"></div>
-            <span className="text-gray-400 text-sm">or</span>
-            <div className="flex-1 h-px bg-gray-300"></div>
-          </div>
-
-
-
-          {/* Login link */}
-          <p className="text-center text-sm text-gray-600 mt-6">
-            do not have an account?{' '}
-            <Link to="/Signup" className="text-blue-600 font-semibold hover:underline">
-              Signup
-            </Link>
+          <p className="mt-2 text-sm text-gray-500">
+            Enter your credentials to continue.
           </p>
 
         </div>
+
+        <form
+          className="space-y-4"
+          onSubmit={handleSubmit}
+        >
+
+          <div>
+            <label
+              htmlFor="email"
+              className="mb-2 block text-sm font-medium text-gray-700"
+            >
+              Email
+            </label>
+
+            <input
+              id="email"
+              type="email"
+              placeholder="Enter your email"
+              value={email}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setError("");
+              }}
+              autoComplete="email"
+              required
+              className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+            />
+          </div>
+
+          <div>
+            <div className="mb-2 flex items-center justify-between">
+
+              <label
+                htmlFor="password"
+                className="text-sm font-medium text-gray-700"
+              >
+                Password
+              </label>
+
+              <Link
+                to="/forgetPassword"
+                className="text-sm font-medium text-blue-600 hover:underline"
+              >
+                Forgot password?
+              </Link>
+
+            </div>
+
+            <input
+              id="password"
+              type="password"
+              placeholder="Enter your password"
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                setError("");
+              }}
+              autoComplete="current-password"
+              required
+              className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+            />
+          </div>
+
+          {error && (
+            <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+              {error}
+            </div>
+          )}
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full rounded-lg bg-blue-600 py-3 font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {loading
+              ? "Logging in..."
+              : "Login"}
+          </button>
+
+        </form>
+
+        <div className="my-6 flex items-center gap-3">
+          <div className="h-px flex-1 bg-gray-200" />
+
+          <span className="text-sm text-gray-400">
+            or
+          </span>
+
+          <div className="h-px flex-1 bg-gray-200" />
+        </div>
+
+        <p className="text-center text-sm text-gray-600">
+          Don't have an account?{" "}
+
+          <Link
+            to="/signup"
+            className="font-semibold text-blue-600 hover:underline"
+          >
+            Sign up
+          </Link>
+        </p>
+
       </div>
 
     </div>
