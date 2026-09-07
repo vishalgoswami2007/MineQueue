@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+
 import {
   Sun,
   Moon,
@@ -7,22 +7,12 @@ import {
   ShieldCheck,
 } from "lucide-react";
 
+import { useTheme } from "../../hooks/useTheme";
+
 function Setting() {
   const navigate = useNavigate();
 
-  const [darkMode, setDarkMode] = useState(() => {
-    return localStorage.getItem("theme") === "dark";
-  });
-
-  useEffect(() => {
-    if (darkMode) {
-      document.documentElement.classList.add("dark");
-      localStorage.setItem("theme", "dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-      localStorage.setItem("theme", "light");
-    }
-  }, [darkMode]);
+  const { darkMode, setDarkMode } = useTheme();
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -38,13 +28,14 @@ function Setting() {
         Settings
       </h1>
 
-      <p className="mt-2 mb-10 text-center text-gray-600 dark:text-gray-400">
+      <p className="mb-10 mt-2 text-center text-gray-600 dark:text-gray-400">
         Manage your account preferences
       </p>
 
       <div className="mx-auto max-w-2xl space-y-6">
 
         <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+
           <h3 className="mb-4 font-semibold text-gray-900 dark:text-white">
             Appearance
           </h3>
@@ -52,6 +43,7 @@ function Setting() {
           <div className="flex items-center justify-between">
 
             <div className="flex items-center gap-3">
+
               {darkMode ? (
                 <Moon
                   size={20}
@@ -71,10 +63,11 @@ function Setting() {
                     : "Light Mode"}
                 </p>
 
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-gray-500 dark:text-gray-400">
                   Change the dashboard appearance
                 </p>
               </div>
+
             </div>
 
             <button
@@ -83,6 +76,7 @@ function Setting() {
                 setDarkMode((previous) => !previous)
               }
               aria-label="Toggle dark mode"
+              aria-pressed={darkMode}
               className={`relative h-6 w-12 rounded-full transition ${
                 darkMode
                   ? "bg-blue-600"
@@ -99,11 +93,13 @@ function Setting() {
             </button>
 
           </div>
+
         </div>
 
         <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900">
 
           <div className="flex items-center gap-3">
+
             <ShieldCheck
               size={20}
               className="text-blue-600"
@@ -114,10 +110,11 @@ function Setting() {
                 Account Security
               </h3>
 
-              <p className="mt-1 text-sm text-gray-500">
-                Your account is protected using authenticated access.
+              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                Your account uses authenticated access for protected dashboard features.
               </p>
             </div>
+
           </div>
 
         </div>
@@ -128,14 +125,14 @@ function Setting() {
             Sign Out
           </h3>
 
-          <p className="mb-4 text-sm text-gray-500">
+          <p className="mb-4 text-sm text-gray-500 dark:text-gray-400">
             Sign out from your MineQueue account on this device.
           </p>
 
           <button
             type="button"
             onClick={handleLogout}
-            className="flex items-center gap-2 rounded-lg border border-red-200 px-4 py-2.5 font-semibold text-red-500 transition hover:bg-red-50 dark:border-red-900 dark:hover:bg-red-950/30"
+            className="flex items-center gap-2 rounded-lg border border-red-200 px-4 py-2.5 font-semibold text-red-500 transition hover:bg-red-50 dark:border-red-900 dark:text-red-400 dark:hover:bg-red-950/30"
           >
             <LogOut size={18} />
             Logout
