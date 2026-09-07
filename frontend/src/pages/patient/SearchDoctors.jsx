@@ -1,87 +1,185 @@
-import { useState } from 'react';
-import { User, Search as SearchIcon } from 'lucide-react';
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  User,
+  Search as SearchIcon,
+  Building2,
+  BadgeCheck,
+} from "lucide-react";
 
-const dummyDoctors = [
-  { id: 1, name: "Dr. Priya Sharma", specialization: "Cardiologist", hospital: "ZyroHospital", experience: "8 years" },
-  { id: 2, name: "Dr. Ankit Verma", specialization: "Dermatologist", hospital: "City Care Hospital", experience: "5 years" },
-  { id: 3, name: "Dr. Ravi Kumar", specialization: "Orthopedic", hospital: "MedLife Hospital", experience: "10 years" },
-  { id: 4, name: "Dr. Neha Gupta", specialization: "Cardiologist", hospital: "City Care Hospital", experience: "6 years" },
-  { id: 5, name: "Dr. Sameer Khan", specialization: "General Physician", hospital: "ZyroHospital", experience: "12 years" },
-  { id: 6, name: "Dr. Anjali Mehta", specialization: "Dermatologist", hospital: "MedLife Hospital", experience: "4 years" },
-];
+import axiosInstance from "../../utils/AxiosInstance";
 
 function SearchDoctors() {
-  const [nameQuery, setNameQuery] = useState('');
-  const [specializationQuery, setSpecializationQuery] = useState('');
+  const navigate = useNavigate();
 
-  const filteredDoctors = dummyDoctors.filter((doctor) => {
-    const matchesName = doctor.name.toLowerCase().includes(nameQuery.toLowerCase());
-    const matchesSpecialization = doctor.specialization.toLowerCase().includes(specializationQuery.toLowerCase());
-    return matchesName && matchesSpecialization;
-  });
+  const [doctors, setDoctors] = useState([]);
+  const [nameQuery, setNameQuery] = useState("");
+  const [specializationQuery, setSpecializationQuery] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const fetchDoctors = async () => {
+      try {
+        setLoading(true);
+        setError("");
+
+        const response = await axiosInstance.get("/dashboard/Doctor");
+
+        setDoctors(response.data.doctor || []);
+      } catch (error) {
+        console.error("Doctors fetch failed:", error);
+
+        setError(
+          error.response?.data?.message ||
+            "Unable to fetch doctors"
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDoctors();
+  }, []);
+
+  const filteredDoctors = useMemo(() => {
+    return doctors.filter((doctor) => {
+      const name = doctor.fullname || "";
+      const specialization = doctor.specialization || "";
+
+      const matchesName = name
+        .toLowerCase()
+        .includes(nameQuery.trim().toLowerCase());
+
+      const matchesSpecialization = specialization
+        .toLowerCase()
+        .includes(specializationQuery.trim().toLowerCase());
+
+      return matchesName && matchesSpecialization;
+    });
+  }, [doctors, nameQuery, specializationQuery]);
+
+  if (loading) {
+    return (
+      <div className="flex min-h-[70vh] items-center justify-center">
+        <p className="text-lg font-semibold text-gray-700">
+          Loading doctors...
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div>
-      {/* Heading */}
-      <h1 className="text-3xl font-bold text-blue-600 text-center">Search Doctors</h1>
-      <p className="text-gray-600 text-center mt-2 mb-8">Find the right doctor by name or specialization</p>
+      <h1 className="text-center text-3xl font-bold text-blue-600">
+        Search Doctors
+      </h1>
 
-      {/* Search Bar */}
-      <div className="flex flex-col sm:flex-row gap-4 mb-12 max-w-3xl mx-auto">
-        <input
-          type="text"
-          placeholder="Dr. Sharma"
-          value={nameQuery}
-          onChange={(e) => setNameQuery(e.target.value)}
-          className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-        />
+      <p className="mt-2 mb-8 text-center text-gray-600">
+        Find the right doctor by name or specialization
+      </p>
+
+      <div className="mx-auto mb-12 flex max-w-3xl flex-col gap-4 sm:flex-row">
+
+        <div className="relative flex-1">
+          <SearchIcon
+            size={18}
+            className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
+          />
+
+          <input
+            type="text"
+            placeholder="Search doctor name..."
+            value={nameQuery}
+            onChange={(e) => setNameQuery(e.target.value)}
+            className="w-full rounded-lg border border-gray-300 py-3 pl-11 pr-4 focus:border-blue-500 focus:outline-none"
+          />
+        </div>
+
         <input
           type="text"
           placeholder="Enter specialization..."
           value={specializationQuery}
           onChange={(e) => setSpecializationQuery(e.target.value)}
-          className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+          className="flex-1 rounded-lg border border-gray-300 px-4 py-3 focus:border-blue-500 focus:outline-none"
         />
-        <button className="px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition flex items-center justify-center gap-2">
-          <SearchIcon size={18} />
-          Search
-        </button>
+
       </div>
 
-      {/* Doctor Cards Grid */}
-      {filteredDoctors.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {error && (
+        <div className="mx-auto mb-8 max-w-2xl rounded-lg border border-red-200 bg-red-50 p-4 text-center text-sm text-red-600">
+          {error}
+        </div>
+      )}
+
+      {!error && filteredDoctors.length > 0 ? (
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+
           {filteredDoctors.map((doctor) => (
             <div
-              key={doctor.id}
-              className="border border-gray-200 rounded-xl shadow-sm p-6 text-center hover:shadow-lg transition bg-white"
+              key={doctor._id}
+              className="rounded-xl border border-gray-200 bg-white p-6 text-center shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
             >
-              {/* Avatar */}
-              <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <User size={36} className="text-blue-600" />
+
+              <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-blue-100">
+                <User
+                  size={36}
+                  className="text-blue-600"
+                />
               </div>
 
-              {/* Name */}
-              <h3 className="text-lg font-bold text-gray-900">{doctor.name}</h3>
+              <div className="flex items-center justify-center gap-2">
+                <h3 className="text-lg font-bold text-gray-900">
+                  {doctor.fullname}
+                </h3>
 
-              {/* Specialization Badge */}
-              <span className="inline-block bg-blue-50 text-blue-600 text-xs font-semibold px-3 py-1 rounded-full mt-2">
-                {doctor.specialization}
+                {doctor.isDoctorVerified && (
+                  <BadgeCheck
+                    size={18}
+                    className="text-blue-600"
+                  />
+                )}
+              </div>
+
+              <span className="mt-2 inline-block rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-600">
+                {doctor.specialization || "General Doctor"}
               </span>
 
-              {/* Hospital + Experience */}
-              <p className="text-sm text-gray-500 mt-3">{doctor.hospital}</p>
-              <p className="text-sm text-gray-500">{doctor.experience} experience</p>
+              <div className="mt-4 flex items-center justify-center gap-2 text-sm text-gray-500">
+                <Building2 size={16} />
 
-              {/* Button */}
-              <button className="w-full mt-5 bg-blue-600 text-white font-semibold py-2 rounded-lg hover:bg-blue-700 transition">
+                <span>
+                  {doctor.hospital || "Hospital not provided"}
+                </span>
+              </div>
+
+              <button
+                type="button"
+                onClick={() =>
+                  navigate(`/patient/doctor/${doctor._id}`)
+                }
+                className="mt-5 w-full rounded-lg bg-blue-600 py-2.5 font-semibold text-white transition hover:bg-blue-700"
+              >
                 View Profile
               </button>
+
             </div>
           ))}
+
         </div>
       ) : (
-        <p className="text-center text-gray-500 mt-12">No doctors found matching your search.</p>
+        !error && (
+          <div className="mt-12 text-center">
+            <User
+              size={42}
+              className="mx-auto text-gray-300"
+            />
+
+            <p className="mt-4 text-gray-500">
+              No doctors found matching your search.
+            </p>
+          </div>
+        )
       )}
     </div>
   );
