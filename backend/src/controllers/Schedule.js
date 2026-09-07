@@ -13,7 +13,6 @@ const validDays = [
 const createSchedule = async (req, res) => {
   try {
     const { day, slots } = req.body;
-
     const doctorId = req.user.userId;
 
     if (!day || !validDays.includes(day)) {
@@ -24,7 +23,7 @@ const createSchedule = async (req, res) => {
 
     if (!Array.isArray(slots) || slots.length === 0) {
       return res.status(400).json({
-        message: "At least one time slot is required",
+        message: "At least one slot is required",
       });
     }
 
@@ -37,85 +36,85 @@ const createSchedule = async (req, res) => {
       )
       .map((slot) => ({
         time: slot.time.trim(),
-        isBooked: false,
       }));
 
     if (cleanedSlots.length === 0) {
       return res.status(400).json({
-        message: "Please provide valid time slots",
+        message: "Please provide valid slots",
       });
     }
 
-    const uniqueTimes = new Set(
-      cleanedSlots.map((slot) => slot.time)
+    const uniqueTimes = [
+      ...new Set(cleanedSlots.map((slot) => slot.time)),
+    ];
+
+    if (uniqueTimes.length !== cleanedSlots.length) {
+      return res.status(400).json({
+        message: "Duplicate slots are not allowed",
+      });
+    }
+
+    const schedule = await Schedule.findOneAndUpdate(
+      {
+        doctorId,
+        day,
+      },
+      {
+        $set: {
+          slots: cleanedSlots,
+        },
+      },
+      {
+        new: true,
+        upsert: true,
+        runValidators: true,
+        setDefaultsOnInsert: true,
+      }
     );
 
-    if (uniqueTimes.size !== cleanedSlots.length) {
-      return res.status(400).json({
-        message: "Duplicate time slots are not allowed",
-      });
-    }
-
-    const existingSchedule = await Schedule.findOne({
-      doctorId,
-      day,
-    });
-
-    let schedule;
-
-    if (existingSchedule) {
-      const bookedSlots = existingSchedule.slots.filter(
-        (slot) => slot.isBooked
-      );
-
-      const bookedTimes = new Set(
-        bookedSlots.map((slot) => slot.time)
-      );
-
-      const availableSlots = cleanedSlots.filter(
-        (slot) => !bookedTimes.has(slot.time)
-      );
-
-      schedule = await Schedule.findByIdAndUpdate(
-        existingSchedule._id,
-        {
-          $set: {
-            slots: [
-              ...bookedSlots,
-              ...availableSlots,
-            ],
-          },
-        },
-        {
-          new: true,
-          runValidators: true,
-        }
-      );
-
-      return res.status(200).json({
-        message: "Schedule Updated Successfully",
-        schedule,
-      });
-    }
-
-    schedule = await Schedule.create({
-      doctorId,
-      day,
-      slots: cleanedSlots,
-    });
-
-    return res.status(201).json({
-      message: "Schedule Created Successfully",
+    return res.status(200).json({
+      message: "Schedule saved successfully",
       schedule,
     });
   } catch (error) {
-    console.error(
-      "Create schedule error:",
-      error
-    );
+    console.error("Create schedule error:", error);
+
+    if (error?.code === 11000) {
+      return res.status(409).json({
+        message: "Schedule already exists for this day",
+      });
+    }
 
     return res.status(500).json({
-      message: "Schedule Creation Failed",
+      message: "Failed to save schedule",
+      error: error.message,
+    });
+  }
+};
+
+const getMySchedule = async (req, res) => {
+  try {
+    const doctorId = req.user.userId;
+
+    const schedules = await Schedule.find({
+      doctorId,
+    });
+
+    const sortedSchedules = schedules.sort(
+      (a, b) =>
+        validDays.indexOf(a.day) -
+        validDays.indexOf(b.day)
+    );
+
+    return res.status(200).json({
+      message: "Schedule fetched successfully",
+      schedules: sortedSchedules,
+    });
+  } catch (error) {
+    console.error("Get my schedule error:", error);
+
+    return res.status(500).json({
+      message: "Failed to fetch schedule",
       error: error.message,
     });
   }
@@ -133,49 +132,23 @@ const getDoctorSchedule = async (req, res) => {
 
     const schedules = await Schedule.find({
       doctorId,
-    }).sort({
-      createdAt: 1,
     });
 
-    return res.status(200).json({
-      message: "Doctor Schedule Fetched Successfully",
-      schedules,
-    });
-  } catch (error) {
-    console.error(
-      "Get doctor schedule error:",
-      error
+    const sortedSchedules = schedules.sort(
+      (a, b) =>
+        validDays.indexOf(a.day) -
+        validDays.indexOf(b.day)
     );
 
-    return res.status(500).json({
-      message: "Unable to fetch doctor schedule",
-      error: error.message,
-    });
-  }
-};
-
-const getMySchedule = async (req, res) => {
-  try {
-    const doctorId = req.user.userId;
-
-    const schedules = await Schedule.find({
-      doctorId,
-    }).sort({
-      createdAt: 1,
-    });
-
     return res.status(200).json({
-      message: "Schedule Fetched Successfully",
-      schedules,
+      message: "Doctor schedule fetched successfully",
+      schedules: sortedSchedules,
     });
   } catch (error) {
-    console.error(
-      "Get my schedule error:",
-      error
-    );
+    console.error("Get doctor schedule error:", error);
 
     return res.status(500).json({
-      message: "Unable to fetch schedule",
+      message: "Failed to fetch doctor schedule",
       error: error.message,
     });
   }
@@ -183,6 +156,6 @@ const getMySchedule = async (req, res) => {
 
 export {
   createSchedule,
-  getDoctorSchedule,
   getMySchedule,
+  getDoctorSchedule,
 };
