@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+
 import {
   Moon,
   Sun,
@@ -7,22 +7,12 @@ import {
   ShieldCheck,
 } from "lucide-react";
 
+import { useTheme } from "../../hooks/useTheme";
+
 function Settings() {
   const navigate = useNavigate();
 
-  const [darkMode, setDarkMode] = useState(() => {
-    return localStorage.getItem("theme") === "dark";
-  });
-
-  useEffect(() => {
-    if (darkMode) {
-      document.documentElement.classList.add("dark");
-      localStorage.setItem("theme", "dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-      localStorage.setItem("theme", "light");
-    }
-  }, [darkMode]);
+  const { darkMode, setDarkMode } = useTheme();
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -33,14 +23,14 @@ function Settings() {
   };
 
   return (
-    <div className="text-slate-800">
+    <div className="text-slate-800 dark:text-slate-100">
 
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-blue-600">
           Settings
         </h1>
 
-        <p className="mt-2 text-slate-500">
+        <p className="mt-2 text-slate-500 dark:text-slate-400">
           Manage your doctor dashboard preferences
         </p>
       </div>
@@ -50,7 +40,6 @@ function Settings() {
         <div className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
 
           <div className="border-b border-slate-200 p-6 dark:border-slate-800">
-
             <h2 className="text-lg font-semibold text-slate-800 dark:text-white">
               Appearance
             </h2>
@@ -58,7 +47,6 @@ function Settings() {
             <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
               Customize how your dashboard looks.
             </p>
-
           </div>
 
           <div className="flex items-center justify-between gap-4 p-6">
@@ -66,13 +54,11 @@ function Settings() {
             <div className="flex items-center gap-4">
 
               <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-blue-50 text-blue-600 dark:bg-blue-950/50 dark:text-blue-400">
-
                 {darkMode ? (
                   <Moon size={21} />
                 ) : (
                   <Sun size={21} />
                 )}
-
               </div>
 
               <div>
@@ -97,6 +83,7 @@ function Settings() {
                 setDarkMode((previous) => !previous)
               }
               aria-label="Toggle dark mode"
+              aria-pressed={darkMode}
               className={`relative h-7 w-12 shrink-0 rounded-full transition ${
                 darkMode
                   ? "bg-blue-600"
@@ -130,7 +117,7 @@ function Settings() {
               </h2>
 
               <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                Your doctor dashboard is protected using authenticated access.
+                Your doctor dashboard uses authenticated access for protected features.
               </p>
             </div>
 
@@ -151,7 +138,7 @@ function Settings() {
           <button
             type="button"
             onClick={handleLogout}
-            className="mt-5 flex items-center gap-2 rounded-lg border border-red-200 px-4 py-2.5 text-sm font-semibold text-red-500 transition hover:bg-red-50 dark:border-red-900 dark:hover:bg-red-950/30"
+            className="mt-5 flex items-center gap-2 rounded-lg border border-red-200 px-4 py-2.5 text-sm font-semibold text-red-500 transition hover:bg-red-50 dark:border-red-900 dark:text-red-400 dark:hover:bg-red-950/30"
           >
             <LogOut size={18} />
             Logout
