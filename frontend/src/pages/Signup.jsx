@@ -52,7 +52,7 @@ function Signup() {
     }
 
     if (password.length < 6) {
-      setError("Password must be at least 6 characters long.");
+      setError("Password must be at least 8 characters long.");
       return;
     }
 
@@ -61,16 +61,16 @@ function Signup() {
       setError("");
       setSuccess("");
 
-      const response = await axiosInstance.post("/auth/signup", {
+     await axiosInstance.post("/auth/signup", {
         fullname: fullName.trim(),
         email: email.trim().toLowerCase(),
         password,
         role,
       });
 
-      setSuccess(
-        response.data?.message || "Account created successfully."
-      );
+      navigate("/verifyOtp", {
+        state: { email: email.trim().toLowerCase() },
+   });
     } catch (error) {
       console.error("Signup error:", error);
       setError(
