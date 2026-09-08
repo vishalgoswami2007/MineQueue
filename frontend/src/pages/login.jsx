@@ -7,6 +7,7 @@ import axiosInstance from "../utils/AxiosInstance";
 
 
 const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+console.log("GOOGLE CLIENT ID:", googleClientId);
 
 function LogIn() {
   const navigate = useNavigate();
