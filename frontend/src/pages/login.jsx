@@ -5,6 +5,7 @@ import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
 import logo from "../assets/logo.png";
 import axiosInstance from "../utils/AxiosInstance";
 
+
 const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 function LogIn() {
@@ -53,14 +54,20 @@ function LogIn() {
       });
 
       completeLogin(response.data);
-    } catch (error) {
-      console.error("Login error:", error);
-      setError(
-        error.response?.data?.message ||
-          error.message ||
-          "Login failed. Please try again."
-      );
-    } finally {
+    } catch (err) {
+    const data = err.response?.data;
+
+  if (err.response?.status === 403 && data?.requiresVerification) {
+    navigate("/verifyOtp", {
+      state: { email: email.trim().toLowerCase() },
+    });
+    return;
+  }
+
+  setError(
+    data?.message || "Login failed. Please try again."
+  );
+}  finally {
       setLoading(false);
     }
   };
