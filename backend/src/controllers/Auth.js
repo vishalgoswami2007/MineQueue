@@ -213,6 +213,54 @@ const verifyOtp = async (req, res) => {
   }
 };
 
+
+const resendVerificationOtp = async (req, res) => {
+  try {
+    const email = normalizeEmail(req.body.email);
+
+    if (!email) {
+      return res.status(400).json({
+        message: "Valid email is required.",
+      });
+    }
+
+    const user = await User.findOne({ email });
+
+    if (!user || user.authProvider !== "local") {
+      return res.status(200).json({
+        message:
+          "If an unverified account exists, a verification code has been sent.",
+      });
+    }
+
+    if (user.isVerified) {
+      return res.status(400).json({
+        message: "Email is already verified.",
+      });
+    }
+
+    const otp = generateOtp();
+
+    user.otpHash = hashOtp(otp);
+    user.otpExpiry = new Date(Date.now() + 10 * 60 * 1000);
+    user.otpPurpose = "signup";
+
+    await user.save();
+
+    await sendOtpEmail(email, otp, "signup");
+
+    return res.status(200).json({
+      message: "Verification OTP sent successfully.",
+    });
+  } catch (error) {
+    console.error("Resend verification OTP error:", error);
+
+    return res.status(500).json({
+      message: "Unable to send verification OTP.",
+    });
+  }
+};
+
 const forgetPassword = async (req, res) => {
   try {
     const email = normalizeEmail(req.body.email);
@@ -379,6 +427,7 @@ export {
   signup,
   login,
   verifyOtp,
+  resendVerificationOtp,
   GoogleOAuth,
   forgetPassword,
   resetPassword,
