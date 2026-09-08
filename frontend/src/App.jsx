@@ -12,6 +12,7 @@ import PricingPage from "./pages/PricingPage";
 import Signup from "./pages/Signup";
 import LogIn from "./pages/login.jsx";
 import ForgetPassword from "./pages/ForgetPassword.jsx";
+import VerifyOtp from "./pages/VerifyOtp.jsx";
 import PrivacyPolicy from "./pages/PrivacyPolicy.jsx";
 import TermsOfService from "./pages/TermsOfService.jsx";
 import Contactus from "./pages/Contactus.jsx";
@@ -103,6 +104,7 @@ function App() {
     "/signup",
     "/logIn",
     "/forgetPassword",
+     "/verifyOtp",
     "/privacy-policy",
     "/terms-of-service",
     "/contact",
@@ -143,6 +145,11 @@ function App() {
         <Route
           path="/forgetPassword"
           element={<ForgetPassword />}
+        />
+
+        <Route
+           path="/verifyOtp"
+           element={<VerifyOtp />}
         />
 
         <Route
