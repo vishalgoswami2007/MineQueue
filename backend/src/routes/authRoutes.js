@@ -6,6 +6,7 @@ import {
   GoogleOAuth,
   forgetPassword,
   verifyOtp,
+  resendVerificationOtp,
   resetPassword,
 } from "../controllers/Auth.js";
 
