@@ -3,8 +3,8 @@ import express from "express";
 import cors from "cors";
 
 import AuthRoutes from "./src/routes/authRoutes.js";
-import ScheduleRoutes from "./src/routes/ScheduleRoutes.js";
-import BookingRoutes from "./src/routes/BookingRoutes.js";
+import ScheduleRoutes from "./src/routes/scheduleRoutes.js";
+import BookingRoutes from "./src/routes/bookingRoutes.js";
 import PaymentRoutes from "./src/routes/paymentRoutes.js";
 import UploadRoutes from "./src/routes/uploadRoutes.js";
 import DashboardRoutes from "./src/routes/DashboardRoutes.js";
@@ -18,18 +18,28 @@ const allowedOrigins = [
 
 app.use(
   cors({
-    origin: function (origin, callback) {
-      // Allow tools like Postman / server-to-server requests
+    origin: (origin, callback) => {
+      // Allow requests with no browser origin (Postman/server-to-server)
       if (!origin) {
         return callback(null, true);
       }
 
+      // Exact trusted origins
       if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      // Allow MineQueue Vercel preview deployments
+      const isMineQueueVercelPreview =
+        /^https:\/\/minequeue-vishal-[a-zA-Z0-9-]+\.vercel\.app$/.test(origin);
+
+      if (isMineQueueVercelPreview) {
         return callback(null, true);
       }
 
       return callback(new Error("Not allowed by CORS"));
     },
+    credentials: true,
   })
 );
 
@@ -43,9 +53,7 @@ app.use("/api/upload", UploadRoutes);
 app.use("/api/dashboard", DashboardRoutes);
 
 app.get("/", (req, res) => {
-  res.status(200).json({
-    message: "MineQueue API is running",
-  });
+  res.send("Server is working!");
 });
 
 export default app;
