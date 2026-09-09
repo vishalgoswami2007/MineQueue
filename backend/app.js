@@ -3,8 +3,8 @@ import express from "express";
 import cors from "cors";
 
 import AuthRoutes from "./src/routes/authRoutes.js";
-import ScheduleRoutes from "./src/routes/scheduleRoutes.js";
-import BookingRoutes from "./src/routes/bookingRoutes.js";
+import ScheduleRoutes from "./src/routes/ScheduleRoutes.js";
+import BookingRoutes from "./src/routes/BookingRoutes.js";
 import PaymentRoutes from "./src/routes/paymentRoutes.js";
 import UploadRoutes from "./src/routes/uploadRoutes.js";
 import DashboardRoutes from "./src/routes/DashboardRoutes.js";
